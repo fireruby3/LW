@@ -210,6 +210,10 @@ html[data-l="en"] .person blockquote{font-style:italic}
 .hero-bgm:focus-visible{outline:2px solid var(--leaf);outline-offset:3px}
 .hero-bgm[aria-pressed="true"]{opacity:.7}
 
+
+.vol{display:flex;align-items:center;gap:6px;color:var(--gold-dim);font-size:12px;flex:none}
+.vol input{width:72px;accent-color:var(--gold);cursor:pointer}
+@media (max-width:640px){.vol input{width:52px}.vol span{display:none}}
 [hidden]{display:none!important}
 /* tabs */
 .nav button{all:unset;cursor:pointer;color:var(--mute);font-size:14px;padding:5px 10px;border-radius:2px;white-space:nowrap}
@@ -303,6 +307,7 @@ html:not([data-l]) .ja,html:not([data-l]) .en{display:none!important}
       <button type="button" role="tab" data-tab="guide"><b>導</b><span class="ja">遊び方</span><span class="ko">가이드</span><span class="en">Guide</span></button>
     </nav>
     <button type="button" class="bgm" id="bgm-bar" aria-pressed="false" aria-label="BGM"><span class="eq" aria-hidden="true"><i></i><i></i><i></i></span><span class="lbl">BGM</span><span class="mood" id="bgm-mood"><span class="ja">世界樹がよく見える夜</span><span class="ko">세계수가 잘 보이는 밤</span><span class="en">A Night the World Tree Shines Clear</span></span></button>
+    <label class="vol" title="BGM"><span aria-hidden="true">♪</span><input type="range" id="bgm-vol" min="0" max="100" value="55" aria-label="BGM volume"></label>
     <div class="lang" role="group" aria-label="Language">
       <button type="button" data-set="ja" aria-pressed="false">日本語</button>
       <button type="button" data-set="ko" aria-pressed="false">한국어</button>
@@ -967,7 +972,10 @@ html:not([data-l]) .ja,html:not([data-l]) .en{display:none!important}
   document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!modal.hidden)close()});
 
   /* BGM */
-  var au=document.getElementById('bgm'),btns=[document.getElementById('bgm-bar'),document.getElementById('bgm-hero')],on=false,fade=null,TARGET=.55;
+  var au=document.getElementById('bgm'),btns=[document.getElementById('bgm-bar'),document.getElementById('bgm-hero')],on=false,fade=null,TARGET=.55,vol=document.getElementById('bgm-vol');
+  try{var sv=localStorage.getItem('lw-vol');if(sv!==null&&!isNaN(+sv)){vol.value=sv}}catch(e){}
+  TARGET=vol.value/100;
+  vol.addEventListener('input',function(){TARGET=vol.value/100;try{localStorage.setItem('lw-vol',vol.value)}catch(e){}if(on){clearInterval(fade);au.volume=TARGET}});
   function render(){btns.forEach(function(b){if(b)b.setAttribute('aria-pressed',on?'true':'false')})}
   function ramp(to,ms,done){clearInterval(fade);var from=au.volume,t0=Date.now();fade=setInterval(function(){var k=Math.min(1,(Date.now()-t0)/ms);au.volume=from+(to-from)*k;if(k>=1){clearInterval(fade);if(done)done()}},40)}
   function play(){on=true;render();au.volume=0;var p=au.play();if(p&&p.catch)p.catch(function(){on=false;render()});ramp(TARGET,1500)}
